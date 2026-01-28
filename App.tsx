@@ -20,12 +20,13 @@ import { motion } from "framer-motion";
 const BeforeAfter = lazy(() => import('./components/BeforeAfter').then(module => ({ default: module.BeforeAfter })));
 const Membership = lazy(() => import('./components/Membership').then(module => ({ default: module.Membership })));
 const ConsultationWizard = lazy(() => import('./components/ConsultationWizard').then(module => ({ default: module.ConsultationWizard })));
+const AiArchitect = lazy(() => import('./components/AiArchitect').then(module => ({ default: module.AiArchitect })));
 
 const navItems = [
   { name: "Home", link: "#hero", icon: <IconHome className="h-5 w-5" /> },
   { name: "Process", link: "#process", icon: <IconActivity className="h-5 w-5" /> },
   { name: "Services", link: "#services", icon: <IconShieldCheck className="h-5 w-5" /> },
-  { name: "About", link: "#about", icon: <IconInfoCircle className="h-5 w-5" /> },
+  { name: "Studio", link: "#studio", icon: <IconBrush className="h-5 w-5" /> },
   { name: "Pricing", link: "#membership", icon: <IconStar className="h-5 w-5" /> },
   { name: "Contact", link: "#booking", icon: <IconInfoCircle className="h-5 w-5" /> },
 ];
@@ -277,6 +278,21 @@ export default function App() {
                    </div>
                 </div>
               ))}
+           </div>
+        </section>
+
+        {/* AI STUDIO SECTION */}
+        <section id="studio" className="w-full py-32 bg-[#080808] border-t border-white/5 relative">
+           <div className="max-w-7xl mx-auto px-6">
+              <div className="text-center mb-16">
+                 <h2 className="text-3xl md:text-5xl font-serif text-white mb-6">AI Design Studio</h2>
+                 <p className="text-neutral-400 text-lg font-light leading-relaxed max-w-2xl mx-auto">
+                    Visualize your home transformation before we begin. Use our AI tools to animate renovations, explore materials, or consult with our digital architect.
+                 </p>
+              </div>
+              <SuspenseSection className="w-full min-h-[600px]">
+                 <AiArchitect />
+              </SuspenseSection>
            </div>
         </section>
 

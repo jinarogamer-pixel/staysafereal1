@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { GoogleGenAI, Type } from "@google/genai";
+import React, { useState, useEffect } from 'react';
+import { GoogleGenAI } from "@google/genai";
 import { 
-  IconSparkles, IconLoader, IconPlayerPlay, IconWand, 
-  IconPhoto, IconMessageCircle, IconSearch, IconBrain, IconUpload, IconMovie, IconVideo
+  IconSparkles, IconLoader, IconMovie, IconWand, 
+  IconPhoto, IconMessageCircle, IconSearch, IconBrain, IconUpload
 } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { signInWithGoogle, logout, auth } from "./auth/firebase";
@@ -28,7 +28,7 @@ export const AiArchitect = () => {
   const [selectedAsset, setSelectedAsset] = useState<{url: string, base64: string, type: string} | null>(null);
   
   // Chat specifics
-  const [chatHistory, setChatHistory] = useState<{role: string, text: string, type?: string, chunks?: any[]}[]>([]);
+  const [chatHistory, setChatHistory] = useState<{role: string, text: string, chunks?: any[]}[]>([]);
   const [useSearch, setUseSearch] = useState(false);
   const [useThinking, setUseThinking] = useState(false);
 
@@ -40,7 +40,6 @@ export const AiArchitect = () => {
     }
   }, []);
 
-  // Helper: File to Base64 (Supports Images and Videos)
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -54,16 +53,30 @@ export const AiArchitect = () => {
     }
   };
 
+  // Helper to ensure paid key is selected for Veo and Gemini 3 Pro Image
+  const ensurePaidKey = async () => {
+    if (window.aistudio) {
+      const hasKey = await window.aistudio.hasSelectedApiKey();
+      if (!hasKey) {
+        await window.aistudio.openSelectKey();
+      }
+    }
+  };
+
   const getClient = () => {
-    if (!process.env.API_KEY) throw new Error("API Key missing");
+    // process.env.API_KEY is injected automatically.
+    // When window.aistudio.openSelectKey() is used, the environment variable is updated for the context.
     return new GoogleGenAI({ apiKey: process.env.API_KEY });
   };
 
   // --- FEATURE 1: VEO VIDEO GENERATION ---
   const handleVeo = async () => {
     setLoading(true);
-    setStatus("Initializing Veo physics engine...");
+    setStatus("Checking license...");
     try {
+      await ensurePaidKey(); // Mandatory for Veo
+      
+      setStatus("Initializing Veo physics engine...");
       const ai = getClient();
       let operation;
 
@@ -104,24 +117,35 @@ export const AiArchitect = () => {
     }
   };
 
-  // --- FEATURE 2: IMAGE GENERATION ---
+  // --- FEATURE 2: IMAGE GENERATION (GEMINI 3 PRO IMAGE) ---
   const handleImageGen = async () => {
     setLoading(true);
     setStatus("Dreaming up architecture...");
     try {
+      await ensurePaidKey(); // Mandatory for Gemini 3 Pro Image Preview
+
       const ai = getClient();
-      const response = await ai.models.generateImages({
-        model: 'gemini-3-pro-image-preview', // Requested model
-        prompt: prompt,
+      // Use generateContent for Gemini 3 Pro Image Preview as per guidelines (not generateImages)
+      const response = await ai.models.generateContent({
+        model: 'gemini-3-pro-image-preview',
+        contents: {
+          parts: [{ text: prompt }]
+        },
         config: {
-          numberOfImages: 1,
-          aspectRatio: aspectRatio as any,
-          outputMimeType: 'image/jpeg'
+          imageConfig: {
+            aspectRatio: aspectRatio as any,
+            imageSize: "1K"
+          }
         }
       });
       
-      const b64 = response.generatedImages?.[0]?.image?.imageBytes;
-      if (b64) setResult(`data:image/jpeg;base64,${b64}`);
+      // Extract image from parts
+      const part = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+      if (part && part.inlineData) {
+        setResult(`data:image/png;base64,${part.inlineData.data}`);
+      } else {
+        throw new Error("No image generated");
+      }
     } catch (e) {
       console.error(e);
       setStatus("Failed to visualize.");
@@ -143,17 +167,15 @@ export const AiArchitect = () => {
         contents: {
           parts: [
             { inlineData: { mimeType: selectedAsset.type, data: selectedAsset.base64 } },
-            { text: prompt } // E.g., "Add a ramp"
+            { text: prompt }
           ]
-        }
+        },
+        // DO NOT set responseMimeType or responseSchema for nano banana models
       });
 
-      // Parse response for image
-      for (const part of response.candidates?.[0]?.content?.parts || []) {
-        if (part.inlineData) {
-          setResult(`data:image/jpeg;base64,${part.inlineData.data}`);
-          break;
-        }
+      const part = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+      if (part && part.inlineData) {
+        setResult(`data:image/png;base64,${part.inlineData.data}`);
       }
     } catch (e) {
         console.error(e);
@@ -163,7 +185,7 @@ export const AiArchitect = () => {
     }
   };
 
-  // --- FEATURE 4: CHAT CONSULTANT (TEXT, IMAGE, & VIDEO) ---
+  // --- FEATURE 4: CHAT CONSULTANT ---
   const handleChat = async () => {
     if (!prompt) return;
     const newMsg = { role: 'user', text: prompt };
@@ -173,42 +195,37 @@ export const AiArchitect = () => {
 
     try {
       const ai = getClient();
-      let model = 'gemini-3-pro-preview';
-      let config: any = {};
+      let model = 'gemini-3-pro-preview'; // Default for complex tasks
+      let config: any = {
+        systemInstruction: "You are a luxury home safety architect. Analyze requests with a focus on biomechanics, high-end aesthetics (brass, walnut, marble), and invisible safety. Be concise but expert."
+      };
 
       if (useThinking) {
+        // Thinking models (Gemini 3/2.5) support thinkingConfig
         model = 'gemini-3-pro-preview';
-        config.thinkingConfig = { thinkingBudget: 32768 };
-        // NOTE: maxOutputTokens must NOT be set when using thinkingConfig without careful calculation.
-        // We leave it unset to let the model manage output.
+        config.thinkingConfig = { thinkingBudget: 16000 };
       } else if (useSearch) {
-        model = 'gemini-3-flash-preview'; // Flash for search
+        // Search tool is available on Pro models
+        model = 'gemini-3-pro-preview'; 
         config.tools = [{googleSearch: {}}];
       }
 
-      // Handle Image/Video Analysis if attached
       let contents: any = prompt;
+      
+      // Multimodal Input
       if (selectedAsset) {
-        // Multimodal input implies Pro model usually
-        model = 'gemini-3-pro-preview'; 
-        
-        // Ensure thinking budget is compatible with multimodal if needed (Thinking models support multimodal)
-        
-        contents = {
+         contents = {
            parts: [
              { inlineData: { mimeType: selectedAsset.type, data: selectedAsset.base64 } },
              { text: prompt }
            ]
-        };
+         };
       }
 
       const response = await ai.models.generateContent({
         model,
         contents,
-        config: {
-            ...config,
-            systemInstruction: "You are a luxury home safety architect. Analyze requests with a focus on biomechanics, high-end aesthetics (brass, walnut, marble), and invisible safety. Be concise but expert."
-        }
+        config
       });
 
       const text = response.text || "I couldn't generate a response.";
@@ -220,7 +237,7 @@ export const AiArchitect = () => {
       setChatHistory(prev => [...prev, { role: 'model', text: "Consultation error. Please try again." }]);
     } finally {
       setLoading(false);
-      setSelectedAsset(null); // Clear asset after send
+      setSelectedAsset(null);
     }
   };
 
@@ -290,7 +307,7 @@ export const AiArchitect = () => {
                         />
                     </div>
 
-                    {/* File Upload (Image or Video) */}
+                    {/* File Upload */}
                     {(activeTab !== 'generate') && (
                         <div>
                             <label className="block text-xs text-neutral-500 uppercase tracking-widest mb-2">
