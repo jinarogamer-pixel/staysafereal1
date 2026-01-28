@@ -1,18 +1,8 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, Suspense, lazy } from "react";
 import { FloatingNav } from "./components/ui/floating-navbar";
-import { ThreeExperience } from "./components/ThreeExperience";
-import { VisionPreview } from "./components/VisionPreview";
-import { BeforeAfter } from "./components/BeforeAfter";
-import { AnimatedTestimonials } from "./components/ui/AnimatedTestimonials";
-import { Resources } from "./components/Resources";
-import { ConsultationWizard } from "./components/ConsultationWizard";
-import { OptimizedImage } from "./components/ui/OptimizedImage";
 import { SafetyHotspotImage } from "./components/ui/SafetyHotspotImage";
-import { NoiseOverlay } from "./components/ui/NoiseOverlay";
-import { CustomCursor } from "./components/ui/CustomCursor";
-import { Philosophy } from "./components/Philosophy";
-import { Exteriors } from "./components/Exteriors";
-import { Membership } from "./components/Membership";
+import { Header } from "./components/Header";
+import { About } from "./components/About";
 import { 
   IconHome, 
   IconInfoCircle, 
@@ -22,253 +12,238 @@ import {
   IconBrush, 
   IconTools, 
   IconAward,
-  IconBook,
-  IconStethoscope,
-  IconRulerMeasure,
-  IconTrees
+  IconAlertCircle
 } from "@tabler/icons-react";
-import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
+import { motion } from "framer-motion";
+
+// Lazy Loaded Components
+const BeforeAfter = lazy(() => import('./components/BeforeAfter').then(module => ({ default: module.BeforeAfter })));
+const Membership = lazy(() => import('./components/Membership').then(module => ({ default: module.Membership })));
+const ConsultationWizard = lazy(() => import('./components/ConsultationWizard').then(module => ({ default: module.ConsultationWizard })));
 
 const navItems = [
-  { name: "Home", link: "#hero", icon: <IconHome className="h-4 w-4 text-neutral-500" /> },
-  { name: "Process", link: "#process", icon: <IconActivity className="h-4 w-4 text-neutral-500" /> },
-  { name: "Interiors", link: "#services", icon: <IconShieldCheck className="h-4 w-4 text-neutral-500" /> },
-  { name: "Exteriors", link: "#exteriors", icon: <IconTrees className="h-4 w-4 text-neutral-500" /> },
-  { name: "Membership", link: "#membership", icon: <IconStar className="h-4 w-4 text-neutral-500" /> },
-  { name: "Portfolio", link: "#portfolio", icon: <IconInfoCircle className="h-4 w-4 text-neutral-500" /> },
+  { name: "Home", link: "#hero", icon: <IconHome className="h-5 w-5" /> },
+  { name: "Process", link: "#process", icon: <IconActivity className="h-5 w-5" /> },
+  { name: "Services", link: "#services", icon: <IconShieldCheck className="h-5 w-5" /> },
+  { name: "About", link: "#about", icon: <IconInfoCircle className="h-5 w-5" /> },
+  { name: "Pricing", link: "#membership", icon: <IconStar className="h-5 w-5" /> },
+  { name: "Contact", link: "#booking", icon: <IconInfoCircle className="h-5 w-5" /> },
 ];
 
 const methodology = [
   {
     icon: <IconActivity className="w-8 h-8 text-gold" />,
-    title: "Clinical Calibration",
-    description: "We don't guess. Our process begins with a biomechanical assessment by licensed Occupational Therapists to identify specific risk vectors unique to your physiology."
+    title: "Expert Assessment",
+    description: "We identify risks you might not see and opportunities for elegant solutions. You’ll receive a detailed report with photos, specific recommendations, and transparent pricing for each modification."
   },
   {
     icon: <IconBrush className="w-8 h-8 text-gold" />,
-    title: "Aesthetic Integration",
-    description: "Safety shouldn't look sterile. Our ASID-certified interior designers select materials (brass, marble, walnut) that complement, not compromise, your home's character."
+    title: "Invisible Design",
+    description: "We select materials that match your home's existing aesthetic. From solid brass grab bars to hidden wall reinforcement, safety never looks like an afterthought."
   },
   {
     icon: <IconTools className="w-8 h-8 text-gold" />,
-    title: "Master Craftsmanship",
-    description: "Installations are executed by artisan builders accustomed to high-end finishes. We use dust barriers, floor protection, and white-glove cleanup protocols."
+    title: "White-Glove Install",
+    description: "Our artisan builders specialize in high-end homes, using dust barriers and floor protection. We work efficiently to minimize disruption to your daily life."
   },
   {
     icon: <IconAward className="w-8 h-8 text-gold" />,
-    title: "The Forever Promise",
-    description: "We stand behind our work with a lifetime warranty on structural reinforcements and annual complimentary safety re-evaluations as your needs evolve."
+    title: "Lifetime Support",
+    description: "Your needs change over time, and so should your home. We provide annual safety audits and priority service to ensure your environment remains secure."
   }
 ];
 
 const features = [
   {
-    title: "Bespoke Fall Prevention",
-    text: "Forget institutional plastic. We integrate hospital-grade support into designer fixtures. Think polished brass grip rails that double as towel warmers, and reinforced walls hidden behind Italian marble.",
-    image: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14", // Updated robust URL
+    title: "Beautiful Grab Bars",
+    text: "Safety doesn't have to look medical. We install solid brass rails that look like high-end towel warmers. They support your weight completely but blend right into your bathroom design.",
+    image: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14",
     hotspots: [
-        { x: 30, y: 40, label: "Reinforced Blocking", detail: "Structural 2x6 backing installed behind marble to support >500lb loads." },
-        { x: 55, y: 35, label: "Grip Integration", detail: "Knurled brass finish provides 3x friction coefficient of standard chrome." },
-        { x: 60, y: 75, label: "Impact Absorption", detail: "Sub-flooring layer designed to reduce peak impact force by 40%." }
+        { x: 30, y: 40, label: "Hidden Strength", detail: "Reinforced wall backing supports full body weight." },
+        { x: 55, y: 35, label: "Secure Grip", detail: "Knurled finish ensures your hand won't slip." },
+        { x: 60, y: 75, label: "Softer Floors", detail: "Sub-flooring designed to reduce impact if you fall." }
     ],
     details: [
-        "Custom-finished grab bars (Brass, Matte Black, Nickel)",
-        "Reinforced structural blocking for future adaptability",
-        "Anti-slip nano-coatings for existing tile"
+        "Finishes match your existing hardware",
+        "Supports over 500 lbs",
+        "Installed into structural studs"
     ]
   },
   {
-    title: "Intelligent Illumination",
-    text: "Falls often happen at night. We install motion-activated, amber-spectrum toe-kick lighting that guides the way to the restroom without disrupting circadian rhythms or waking a partner.",
+    title: "Night-Time Safety",
+    text: "Most falls happen at night. We install soft, motion-activated lighting along the floor. It guides you to the bathroom without waking you up or needing a switch.",
     image: "https://images.unsplash.com/photo-1565814329452-e1efa11c5b89",
     hotspots: [
-        { x: 50, y: 85, label: "Toe-Kick Sensors", detail: "Passive IR sensors activate floor-level lighting upon motion." },
-        { x: 15, y: 55, label: "Circadian Amber", detail: "2700K color temp prevents blue-light wakefulness triggers." },
-        { x: 80, y: 35, label: "Shadow Reduction", detail: "Multi-point recessed lights eliminate depth-perception distorting shadows." }
+        { x: 50, y: 85, label: "Auto-Sensors", detail: "Lights turn on automatically when your feet hit the floor." },
+        { x: 15, y: 55, label: "Soft Glow", detail: "Warm amber light that doesn't hurt your eyes." },
+        { x: 80, y: 35, label: "No Shadows", detail: "Even lighting helps you see steps clearly." }
     ],
     details: [
-        "Motion-sensing baseboard LEDs",
-        "Under-bed glow systems",
-        "Voice-activated scenes"
+        "Hands-free operation",
+        "Battery backup for power outages",
+        "Hidden wiring"
     ]
   },
   {
-    title: "Architectural Mobility",
-    text: "Seamless movement requires zero thresholds. We regrade floors for flush transitions and widen doorways, ensuring that wheelchairs or walkers glide effortlessly from room to room.",
+    title: "Easy Movement",
+    text: "Trip hazards are everywhere. We smooth out floor transitions and widen doorways so you can walk, use a walker, or use a wheelchair without any obstacles.",
     image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
     hotspots: [
-        { x: 30, y: 80, label: "Zero-Threshold", detail: "Flush transition regraded to within 1/8 inch tolerance." },
-        { x: 80, y: 45, label: "Widened Aperture", detail: "Door frame expanded to 36 inches for clear wheelchair clearance." },
-        { x: 60, y: 20, label: "Offset Hinges", detail: "Specialized hardware adds 2 inches of clear passage width." }
+        { x: 30, y: 80, label: "Smooth Floors", detail: "No bumps or raised thresholds between rooms." },
+        { x: 80, y: 45, label: "Wider Doors", detail: "Expanded frames for easy walker or wheelchair access." },
+        { x: 60, y: 20, label: "Easy Handles", detail: "Lever handles that are easy to open with one hand." }
     ],
     details: [
-        "Zero-entry showers",
         "Flush door thresholds",
-        "Hidden landscaping ramps"
+        "Slip-resistant tile options",
+        "Ramps hidden in landscaping"
+    ]
+  },
+  {
+    title: "Pool & Garden Safety",
+    text: "Enjoy your Florida outdoor living safely. We treat pool decks to be non-slip and install lifts that disappear into the ground when you aren't using them.",
+    image: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7",
+    hotspots: [
+        { x: 20, y: 80, label: "Non-Slip Stone", detail: "Invisible coating prevents slipping even when wet." },
+        { x: 50, y: 50, label: "Hidden Lift", detail: "Pool lift retracts flush into the deck." },
+        { x: 80, y: 30, label: "Smart Alerts", detail: "System alerts you if anyone falls in the pool." }
+    ],
+    details: [
+        "Invisible pool lifts",
+        "Level garden paths",
+        "Bright pathway lighting"
     ]
   }
 ];
 
+// Helper to prevent layout shift during lazy loading
+const SuspenseSection = ({ children, className }: { children?: React.ReactNode, className: string }) => (
+  <Suspense fallback={<div className={className} />}>
+    {children}
+  </Suspense>
+);
+
 export default function App() {
   const containerRef = useRef(null);
-  const { scrollY } = useScroll();
-  const [currentSection, setCurrentSection] = useState("hero");
-  
-  // Parallax effects
-  const heroTextY = useTransform(scrollY, [0, 500], [0, 200]);
-  const heroOpacity = useTransform(scrollY, [0, 400], [1, 0]);
-
-  // Track section for 3D experience
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    if (latest < 800) setCurrentSection("hero");
-    else if (latest < 2500) setCurrentSection("philosophy");
-    else if (latest < 3500) setCurrentSection("process");
-    else if (latest < 5000) setCurrentSection("services");
-    else if (latest < 6000) setCurrentSection("portfolio");
-    else setCurrentSection("booking");
-  });
 
   return (
-    <div ref={containerRef} className="relative w-full bg-[#050505] min-h-screen selection:bg-gold selection:text-black scroll-smooth cursor-none">
-      <CustomCursor />
-      <NoiseOverlay />
+    <div ref={containerRef} className="relative w-full bg-[#050505] min-h-screen selection:bg-gold selection:text-black scroll-smooth cursor-auto text-lg text-neutral-300">
       
-      {/* Background 3D Layer - Subtle ambient movement */}
-      <div className="fixed inset-0 z-0 opacity-40 pointer-events-none mix-blend-screen">
-         <ThreeExperience currentSection={currentSection} />
-      </div>
+      {/* Static Elegant Background */}
+      <div className="fixed inset-0 bg-gradient-to-br from-[#121212] via-[#0a0a0a] to-[#050505] z-0 pointer-events-none" />
 
+      <Header />
       <FloatingNav navItems={navItems} />
 
-      <main className="relative z-10 w-full overflow-hidden">
+      <main className="relative z-10 w-full overflow-hidden" id="main-content">
         
-        {/* HERO SECTION - Editorial Layout */}
-        <section id="hero" className="relative w-full min-h-screen flex flex-col justify-center px-6 lg:px-20 pt-20 perspective-1000">
-          <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#111] to-transparent pointer-events-none" />
-          
+        {/* HERO SECTION */}
+        <section id="hero" className="relative w-full min-h-[95vh] flex flex-col justify-center px-6 lg:px-20 pt-20">
+           {/* Subtle Background Image */}
+           <div className="absolute inset-0 z-0 bg-[url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1600&auto=format&fit=crop')] bg-cover bg-center opacity-20 mask-image-gradient" />
+           <div className="absolute inset-0 z-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
+
           <motion.div 
-            style={{ y: heroTextY, opacity: heroOpacity }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
             className="max-w-4xl z-10"
           >
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="flex items-center gap-4 mb-8"
-            >
+            <div className="flex items-center gap-4 mb-8">
                <span className="h-[1px] w-20 bg-gradient-to-r from-transparent to-gold"></span>
-               <span className="text-gold/80 uppercase tracking-[0.3em] text-xs font-medium">West Palm Beach • Aspen • New York</span>
-            </motion.div>
+               <span className="text-gold uppercase tracking-[0.2em] text-sm font-bold">West Palm Beach • Aspen • New York</span>
+            </div>
             
-            <motion.h1 
-               initial={{ opacity: 0, y: 30 }}
-               animate={{ opacity: 1, y: 0 }}
-               transition={{ duration: 0.8, delay: 0.4 }}
-               className="text-6xl md:text-9xl font-serif font-medium tracking-tighter text-white leading-[0.9] mb-8"
-            >
-              Estate <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-br from-neutral-200 to-neutral-600 italic pr-4">
-                Future-Proofing.
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-medium tracking-tight text-white leading-[1.1] mb-8">
+              Stay In The Home You Love. <br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold to-white italic pr-4">
+                Safely & Beautifully.
               </span>
-            </motion.h1>
+            </h1>
             
-            <motion.div 
-               initial={{ opacity: 0 }}
-               animate={{ opacity: 1 }}
-               transition={{ duration: 1, delay: 0.8 }}
-               className="flex flex-col md:flex-row gap-8 md:items-end"
-            >
-              <p className="text-lg text-neutral-400 max-w-xl font-light leading-relaxed border-l border-white/10 pl-6">
-                From zero-threshold gardens to clinical-grade interior architecture. We provide comprehensive safety intelligence for the entire estate—inside and out.
+            <div className="flex flex-col md:flex-row gap-8 md:items-end">
+              <p className="text-xl text-neutral-300 max-w-xl font-normal leading-relaxed border-l-2 border-gold/50 pl-6">
+                 We transform luxury homes into safe havens without compromising the beauty you love. Invisible safety, installed by experts.
               </p>
               
-              <a href="#membership" className="group flex items-center gap-4 px-8 py-4 bg-white text-black hover:bg-gold transition-colors duration-500">
-                <span className="uppercase tracking-widest text-sm font-bold">Explore Membership</span>
-                <span className="group-hover:translate-x-2 transition-transform duration-300">→</span>
-              </a>
-            </motion.div>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <a href="#booking" className="group flex items-center justify-center gap-4 px-8 py-5 bg-gold text-black hover:bg-white transition-colors duration-300 min-w-[220px] rounded-sm shadow-lg">
+                  <span className="uppercase tracking-widest text-sm font-bold">Book Assessment</span>
+                  <span className="group-hover:translate-x-1 transition-transform">→</span>
+                </a>
+                <a href="tel:+15615551234" className="group flex items-center justify-center gap-4 px-8 py-5 border border-white/20 text-white hover:bg-white/10 transition-colors duration-300 min-w-[220px] rounded-sm">
+                  <span className="uppercase tracking-widest text-sm font-bold">Call (561) 555-1234</span>
+                </a>
+              </div>
+            </div>
+
+            <div className="mt-12 flex gap-8 opacity-70">
+                <div className="flex flex-col">
+                    <span className="text-2xl font-serif text-white">Licensed</span>
+                    <span className="text-[10px] uppercase tracking-widest text-neutral-400">Therapists</span>
+                </div>
+                <div className="w-[1px] h-10 bg-white/20"></div>
+                <div className="flex flex-col">
+                    <span className="text-2xl font-serif text-white">Expert</span>
+                    <span className="text-[10px] uppercase tracking-widest text-neutral-400">Installers</span>
+                </div>
+                <div className="w-[1px] h-10 bg-white/20"></div>
+                <div className="flex flex-col">
+                    <span className="text-2xl font-serif text-white">Lifetime</span>
+                    <span className="text-[10px] uppercase tracking-widest text-neutral-400">Warranty</span>
+                </div>
+            </div>
           </motion.div>
         </section>
 
-        {/* PHILOSOPHY / STORYTELLING SECTION */}
-        <div id="philosophy">
-          <Philosophy />
-        </div>
-
-        {/* METHODOLOGY / DIFFERENTIATION */}
-        <section id="process" className="w-full py-32 bg-[#080808] relative">
+        {/* METHODOLOGY */}
+        <section id="process" className="w-full py-32 bg-[#080808] relative border-t border-white/5">
             <div className="max-w-7xl mx-auto px-6">
-                <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6 }}
-                    className="mb-20 flex flex-col md:flex-row justify-between items-end gap-8"
-                >
-                    <div className="max-w-3xl">
-                      <h2 className="text-4xl md:text-6xl font-serif text-white mb-6">The Stay Safe Standard</h2>
-                      <p className="text-neutral-400 text-lg font-light leading-relaxed">
-                          Most contractors see a patient. We see a patron. Our proprietary methodology bridges the gap between medical necessity and architectural beauty.
+                <div className="mb-16">
+                      <h2 className="text-3xl md:text-5xl font-serif text-white mb-6">Our Process</h2>
+                      <p className="text-neutral-400 text-lg font-light leading-relaxed max-w-3xl">
+                          We handle everything from the initial safety check to the final cleanup. You get a safer home without the stress.
                       </p>
-                    </div>
-                    {/* DIFFERENTIATION TAG */}
-                    <div className="flex flex-col items-start md:items-end gap-2 text-right">
-                       <div className="flex items-center gap-2 text-gold">
-                          <IconStethoscope size={20} />
-                          <span className="uppercase tracking-widest text-xs font-bold">Clinical Rigor</span>
-                       </div>
-                       <div className="h-[1px] w-full bg-white/20"></div>
-                       <div className="flex items-center gap-2 text-neutral-400">
-                          <IconRulerMeasure size={20} />
-                          <span className="uppercase tracking-widest text-xs">Architectural Precision</span>
-                       </div>
-                    </div>
-                </motion.div>
+                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {methodology.map((step, i) => (
-                        <motion.div 
+                        <div 
                             key={i} 
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: i * 0.1 }}
-                            whileHover={{ y: -10 }}
-                            className="group p-8 border border-white/5 hover:border-gold/30 bg-[#0c0c0c] transition-all duration-300 relative overflow-hidden"
+                            className="group p-8 border border-white/5 hover:border-gold/30 bg-[#0c0c0c] transition-all duration-300 relative overflow-hidden rounded-sm flex flex-col h-full"
                         >
                             <div className="absolute top-0 right-0 p-4 opacity-10 text-6xl font-serif font-bold text-white group-hover:text-gold transition-colors">
                                 0{i+1}
                             </div>
-                            <div className="mb-8 bg-white/5 w-16 h-16 rounded-full flex items-center justify-center group-hover:bg-gold/20 transition-colors">
+                            <div className="mb-6 bg-white/5 w-14 h-14 rounded-full flex items-center justify-center group-hover:bg-gold/20 transition-colors flex-shrink-0">
                                 {step.icon}
                             </div>
                             <h3 className="text-xl font-serif text-white mb-4">{step.title}</h3>
-                            <p className="text-neutral-500 text-sm leading-relaxed">
+                            <p className="text-neutral-400 text-base leading-relaxed flex-grow">
                                 {step.description}
                             </p>
-                        </motion.div>
+                        </div>
                     ))}
                 </div>
             </div>
         </section>
 
-        {/* SERVICES / FEATURES - Magazine Style with HOTSPOTS */}
-        <section id="services" className="w-full py-20 px-6 bg-[#0a0a0a]">
-           <div className="max-w-7xl mx-auto space-y-32">
-              <div className="border-b border-white/10 pb-8 mb-12">
-                 <h2 className="text-3xl font-serif text-white">Interior Architecture</h2>
+        {/* ABOUT SECTION - ADDED */}
+        <About />
+
+        {/* SERVICES */}
+        <section id="services" className="w-full py-32 px-6 bg-[#0a0a0a]">
+           <div className="max-w-7xl mx-auto space-y-40">
+              <div className="border-b border-white/10 pb-6 mb-12 flex justify-between items-end">
+                 <h2 className="text-3xl font-serif text-white">Key Upgrades</h2>
+                 <p className="hidden md:block text-neutral-500 text-sm uppercase tracking-widest">Medical Grade • Invisible Design</p>
               </div>
               {features.map((feature, i) => (
-                <motion.div 
+                <div 
                     key={i} 
-                    initial={{ opacity: 0, y: 40 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-10%" }}
-                    transition={{ duration: 0.8 }}
                     className={`flex flex-col ${i % 2 === 1 ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-16`}
                 >
-                   <div className="w-full md:w-1/2 aspect-[4/5] relative overflow-hidden group rounded-sm shadow-2xl">
-                      {/* Using SafetyHotspotImage to visualize hidden tech */}
+                   <div className="w-full md:w-1/2 aspect-[4/3] relative rounded-sm shadow-2xl bg-neutral-900">
                       <SafetyHotspotImage 
                         src={feature.image} 
                         alt={feature.title}
@@ -276,116 +251,141 @@ export default function App() {
                         className="w-full h-full"
                       />
                    </div>
-                   <div className="w-full md:w-1/2 space-y-8">
+                   <div className="w-full md:w-1/2 space-y-6">
                       <div className="flex items-center gap-4">
                           <div className="text-gold text-lg font-serif italic">0{i + 1}</div>
                           <div className="h-[1px] w-12 bg-white/10"></div>
                       </div>
                       
-                      <h3 className="text-4xl md:text-5xl font-serif text-white leading-tight">{feature.title}</h3>
+                      <h3 className="text-3xl md:text-4xl font-serif text-white leading-tight">{feature.title}</h3>
                       
-                      <p className="text-neutral-400 text-lg font-light leading-relaxed max-w-md border-l-2 border-white/5 pl-6">
+                      <p className="text-neutral-300 text-lg font-light leading-relaxed max-w-prose border-l-2 border-white/5 pl-6">
                         {feature.text}
                       </p>
 
-                      <div className="grid gap-4">
-                          <h4 className="text-white text-sm uppercase tracking-widest font-bold">Specific Interventions</h4>
+                      <div className="grid gap-4 mt-8">
+                          <h4 className="text-white text-xs uppercase tracking-widest font-bold">Included Features</h4>
                           <ul className="space-y-3">
                             {feature.details.map((detail, idx) => (
-                                <li key={idx} className="text-neutral-400 text-sm flex items-start gap-3 group/item">
-                                    <span className="w-1.5 h-1.5 mt-1.5 bg-gold rounded-full group-hover/item:scale-150 transition-transform"></span>
+                                <li key={idx} className="text-neutral-400 text-base flex items-start gap-3 group/item">
+                                    <span className="w-1.5 h-1.5 mt-2.5 bg-gold rounded-full flex-shrink-0"></span>
                                     <span className="group-hover/item:text-white transition-colors">{detail}</span>
                                 </li>
                             ))}
                           </ul>
                       </div>
                    </div>
-                </motion.div>
+                </div>
               ))}
            </div>
         </section>
 
-        {/* EXTERIORS SECTION */}
-        <Exteriors />
-
-        {/* BEFORE / AFTER SLIDER */}
-        <section id="portfolio" className="w-full py-32 bg-neutral-950">
-           <div className="max-w-[1800px] mx-auto px-6">
-              <motion.div 
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 1 }}
-                className="flex flex-col md:flex-row justify-between items-end mb-12"
-              >
-                 <h2 className="text-4xl md:text-6xl font-serif text-white">The Invisible Update</h2>
-                 <p className="text-neutral-500 max-w-md text-right mt-4 md:mt-0">
-                    Drag the slider completely to the left to reveal the hidden engineering specifications that make our designs medical-grade.
-                 </p>
-              </motion.div>
-              <BeforeAfter />
+        {/* PORTFOLIO SLIDER (Before/After) */}
+        <section id="portfolio" className="w-full py-32 bg-neutral-950 border-t border-white/5">
+           <div className="max-w-[1400px] mx-auto px-6">
+              <div className="flex flex-col md:flex-row justify-between items-end mb-12">
+                 <div>
+                    <h2 className="text-3xl md:text-5xl font-serif text-white">The Visible Difference</h2>
+                    <p className="text-neutral-400 mt-4 text-lg max-w-lg">
+                        See how we add safety features without ruining the look of your room.
+                    </p>
+                 </div>
+                 <div className="hidden md:block text-right">
+                    <p className="text-gold text-sm font-bold uppercase tracking-widest">Interactive Demo</p>
+                    <p className="text-neutral-500 text-xs">Drag slider to compare</p>
+                 </div>
+              </div>
+              <SuspenseSection className="h-[600px] w-full bg-neutral-900 rounded-sm">
+                <BeforeAfter />
+              </SuspenseSection>
            </div>
         </section>
 
-        {/* MEMBERSHIP / SERVICE MODEL */}
-        <Membership />
+        {/* MEMBERSHIP & PRICING */}
+        <SuspenseSection className="py-32 bg-neutral-950">
+          <Membership />
+        </SuspenseSection>
 
-        {/* VEO VISION PREVIEW */}
-        <section id="vision" className="w-full py-32 bg-[#080808] border-y border-white/5">
-           <div className="max-w-6xl mx-auto px-6 text-center">
-              <h2 className="text-4xl md:text-6xl font-serif text-white mb-8">Digital Twin Audit</h2>
-              <p className="text-neutral-400 max-w-2xl mx-auto mb-12">
-                 Part of our initial assessment includes a comprehensive AI visualization of your specific floorplan. Upload a video walkthrough to receive a preliminary risk vector analysis.
-              </p>
-              
-              <VisionPreview />
-           </div>
+        {/* FOUNDING OFFER BANNER - REVISED COPY */}
+        <section className="w-full py-12 px-6">
+            <div className="max-w-4xl mx-auto relative overflow-hidden rounded-sm border border-gold/30 bg-gradient-to-br from-neutral-900 to-black p-8 md:p-12 shadow-[0_0_40px_rgba(212,175,55,0.1)] text-center">
+                {/* Decorative Shine */}
+                <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-gold/10 blur-[50px] rounded-full pointer-events-none"></div>
+                
+                <div className="relative z-10 flex flex-col items-center gap-6">
+                    <div className="inline-flex items-center justify-center gap-2 text-gold border border-gold/30 rounded-full px-4 py-1 text-xs font-bold uppercase tracking-widest mb-2">
+                        <span className="w-2 h-2 rounded-full bg-gold animate-pulse"></span>
+                        Limited Availability
+                    </div>
+                    
+                    <h3 className="text-3xl md:text-4xl font-serif text-white">
+                        West Palm Beach Launch Offer
+                    </h3>
+                    
+                    <p className="text-neutral-300 text-lg leading-relaxed max-w-2xl mx-auto">
+                        We are accepting our first <span className="text-white font-semibold">10 founding clients</span>. 
+                        Receive <span className="text-gold font-bold">$1,000 in installation credits</span> and priority scheduling.
+                        In exchange, we ask for detailed testimonials, photography permission, and a reference call with future clients.
+                    </p>
+
+                    <div className="pt-4">
+                        <a href="#booking" className="inline-flex items-center gap-2 bg-gold text-black px-10 py-4 font-bold uppercase tracking-widest hover:bg-white transition-all duration-300 rounded-sm shadow-lg hover:scale-105">
+                            Claim Founding Status
+                        </a>
+                        <p className="text-neutral-500 text-xs mt-4">
+                            Offer ends soon • 3 spots remaining
+                        </p>
+                    </div>
+                </div>
+            </div>
         </section>
 
-        {/* JOURNAL / RESOURCES */}
-        <Resources />
-
-        {/* TESTIMONIALS */}
-        <section className="w-full py-20 bg-black">
-            <h2 className="text-center text-4xl font-serif text-white mb-12">Client Stories</h2>
-            <AnimatedTestimonials />
-        </section>
-
-        {/* BOOKING SECTION (CONSULTATION WIZARD) */}
+        {/* BOOKING */}
         <section id="booking" className="w-full py-32 px-6 flex justify-center bg-gradient-to-b from-black to-[#080808]">
-           <motion.div 
-             initial={{ opacity: 0, scale: 0.95 }}
-             whileInView={{ opacity: 1, scale: 1 }}
-             viewport={{ once: true }}
-             transition={{ duration: 0.8 }}
-             className="w-full max-w-5xl"
-           >
-              <ConsultationWizard />
-           </motion.div>
+           <div className="w-full max-w-4xl">
+              <SuspenseSection className="min-h-[600px]">
+                <ConsultationWizard />
+              </SuspenseSection>
+           </div>
         </section>
 
         {/* FOOTER */}
-        <footer className="w-full border-t border-white/5 py-12 bg-black px-6">
+        <footer className="w-full border-t border-white/5 py-16 bg-black px-6">
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-12">
                 <div className="space-y-4">
                     <div className="text-3xl font-serif text-white italic">Stay Safe</div>
-                    <p className="text-neutral-600 text-sm max-w-xs">
+                    <p className="text-neutral-500 text-sm max-w-xs leading-relaxed">
                        Concierge home safety transformations for the discerning homeowner.
+                       <br/>
+                       West Palm Beach • Aspen • New York
                     </p>
-                </div>
-                <div className="flex gap-12 text-sm text-neutral-500">
-                    <div className="flex flex-col gap-2">
-                        <span className="text-white font-medium mb-2">Company</span>
-                        <a href="#" className="hover:text-gold transition-colors">About</a>
-                        <a href="#" className="hover:text-gold transition-colors">Careers</a>
-                        <a href="#" className="hover:text-gold transition-colors">Press</a>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <span className="text-white font-medium mb-2">Legal</span>
-                        <a href="#" className="hover:text-gold transition-colors">Privacy</a>
-                        <a href="#" className="hover:text-gold transition-colors">Terms</a>
+                    <div className="pt-4">
+                         <a href="tel:+15615551234" className="text-white text-lg font-medium hover:text-gold transition-colors block mb-1">
+                            (561) 555-1234
+                        </a>
+                        <a href="mailto:info@staysafe.com" className="text-neutral-400 text-sm hover:text-white transition-colors">
+                            info@staysafe.com
+                        </a>
                     </div>
                 </div>
+                
+                <div className="grid grid-cols-2 gap-12 sm:gap-24">
+                    <div className="flex flex-col gap-4">
+                        <span className="text-white font-medium mb-2 uppercase tracking-widest text-xs">Company</span>
+                        <a href="#about" className="text-neutral-500 text-sm hover:text-gold transition-colors">About Us</a>
+                        <a href="#services" className="text-neutral-500 text-sm hover:text-gold transition-colors">Services</a>
+                        <a href="#booking" className="text-neutral-500 text-sm hover:text-gold transition-colors">Contact</a>
+                    </div>
+                    <div className="flex flex-col gap-4">
+                        <span className="text-white font-medium mb-2 uppercase tracking-widest text-xs">Legal</span>
+                        <a href="#" className="text-neutral-500 text-sm hover:text-gold transition-colors">Privacy Policy</a>
+                        <a href="#" className="text-neutral-500 text-sm hover:text-gold transition-colors">Terms of Service</a>
+                        <a href="#" className="text-neutral-500 text-sm hover:text-gold transition-colors">Cookie Policy</a>
+                    </div>
+                </div>
+            </div>
+            <div className="max-w-7xl mx-auto border-t border-white/5 mt-12 pt-8 text-center md:text-left text-neutral-600 text-xs">
+                © {new Date().getFullYear()} Stay Safe Design. All rights reserved.
             </div>
         </footer>
 

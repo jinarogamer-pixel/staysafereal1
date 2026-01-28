@@ -24,6 +24,8 @@ export const ThreeExperience: React.FC<ThreeExperienceProps> = ({ currentSection
   useEffect(() => {
     if (!mountRef.current) return;
 
+    const isMobile = window.innerWidth < 768;
+
     // --- Scene Setup ---
     const scene = new THREE.Scene();
     scene.background = new THREE.Color('#0F1114');
@@ -32,7 +34,11 @@ export const ThreeExperience: React.FC<ThreeExperienceProps> = ({ currentSection
     const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
     camera.position.set(4, 3, 6);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    const renderer = new THREE.WebGLRenderer({ 
+        antialias: !isMobile, // Disable AA on mobile for performance
+        alpha: false,
+        powerPreference: "high-performance"
+    });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
@@ -40,7 +46,6 @@ export const ThreeExperience: React.FC<ThreeExperienceProps> = ({ currentSection
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     mountRef.current.appendChild(renderer.domElement);
 
-    const isMobile = window.innerWidth < 768;
     
     let composer: EffectComposer | null = null;
     if (!isMobile) {
@@ -49,7 +54,7 @@ export const ThreeExperience: React.FC<ThreeExperienceProps> = ({ currentSection
         composer.addPass(renderPass);
         const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.8, 0.4, 0.85);
         bloomPass.threshold = 0.2;
-        bloomPass.strength = 0.4; 
+        bloomPass.strength = 0.3; 
         bloomPass.radius = 0.5;
         composer.addPass(bloomPass);
     }
@@ -59,12 +64,14 @@ export const ThreeExperience: React.FC<ThreeExperienceProps> = ({ currentSection
     const dirLight = new THREE.DirectionalLight(0xfffaed, 1);
     dirLight.position.set(5, 8, 5);
     dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = isMobile ? 512 : 2048;
-    dirLight.shadow.mapSize.height = isMobile ? 512 : 2048;
+    // Optimize shadow map size based on device
+    const shadowSize = isMobile ? 512 : 2048;
+    dirLight.shadow.mapSize.width = shadowSize;
+    dirLight.shadow.mapSize.height = shadowSize;
     scene.add(dirLight);
 
     // Helpers
-    const createNoiseTexture = (size = 512, scale = 1, opacity = 1) => {
+    const createNoiseTexture = (size = 256, scale = 1, opacity = 1) => {
         const canvas = document.createElement('canvas');
         canvas.width = size;
         canvas.height = size;
@@ -72,7 +79,8 @@ export const ThreeExperience: React.FC<ThreeExperienceProps> = ({ currentSection
         if (ctx) {
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0,0,size,size);
-            for(let i=0; i<5000; i++) {
+            // Reduced loop count for texture generation
+            for(let i=0; i<1000; i++) {
                 ctx.fillStyle = `rgba(0,0,0,${Math.random() * 0.1 * opacity})`;
                 ctx.fillRect(Math.random()*size, Math.random()*size, Math.random()*scale + 1, Math.random()*scale + 1);
             }
@@ -81,14 +89,20 @@ export const ThreeExperience: React.FC<ThreeExperienceProps> = ({ currentSection
     };
 
     const materials = {
-        floor: new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.1, metalness: 0.1, normalMap: createNoiseTexture(512, 4, 0.5) }),
-        wall: new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.8, roughnessMap: createNoiseTexture(512, 2, 0.8) }),
+        floor: new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.1, metalness: 0.1 }),
+        wall: new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.8 }),
         furniture: new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.6 }),
         metal: new THREE.MeshStandardMaterial({ color: 0xaaaaaa, roughness: 0.2, metalness: 0.8 }),
         accent: new THREE.MeshStandardMaterial({ color: 0x00A896, emissive: 0x002220 }),
         accentGold: new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 0.6 }),
         glow: new THREE.MeshPhysicalMaterial({ color: 0xffffff, emissive: 0xffaa00, emissiveIntensity: 2, roughness: 0, transmission: 0.9 })
     };
+
+    // Add noise maps only if not mobile to save memory
+    if (!isMobile) {
+        materials.floor.normalMap = createNoiseTexture(512, 4, 0.5);
+        materials.wall.roughnessMap = createNoiseTexture(512, 2, 0.8);
+    }
 
     const objects: any = {};
     const springs: any = {};
@@ -104,9 +118,9 @@ export const ThreeExperience: React.FC<ThreeExperienceProps> = ({ currentSection
     couch.position.set(2, 0.5, -3); roomGroup.add(couch);
     scene.add(roomGroup);
 
-    // Particles (Dust Motes)
+    // Particles (Dust Motes) - Reduced count
     const particlesGeometry = new THREE.BufferGeometry();
-    const particlesCount = 300;
+    const particlesCount = isMobile ? 100 : 300;
     const posArray = new Float32Array(particlesCount * 3);
     for(let i = 0; i < particlesCount * 3; i++) {
       posArray[i] = (Math.random() - 0.5) * 15;

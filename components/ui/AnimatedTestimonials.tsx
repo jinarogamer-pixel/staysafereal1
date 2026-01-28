@@ -1,95 +1,118 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { IconQuote } from '@tabler/icons-react';
 
-const testimonials = [
+// Transformed from fake testimonials to "Client Archetypes" / Philosophy
+const pillars = [
   {
-    quote: "Stay Safe transformed my parents' home. The grab bars look like part of the design, not hospital equipment. It feels more like a spa renovation than a safety retrofit.",
-    name: "Sarah Jenkins",
-    role: "Daughter, West Palm Beach",
-    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400&auto=format&fit=crop",
-    rating: 5
+    quote: "Safety measures should never announce themselves. Our philosophy is invisible integration—where a grab bar looks like a towel warmer and a ramp looks like landscape architecture.",
+    title: "The Design Ethos",
+    subtitle: "Aesthetic Integration",
+    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=400&auto=format&fit=crop",
+    features: [
+        { label: "Focus", value: "Invisible" },
+        { label: "Material", value: "Premium" },
+        { label: "Result", value: "Beauty" }
+    ]
   },
   {
-    quote: "Professional, quick, and incredibly knowledgeable about what I needed after my surgery. They anticipated needs I hadn't even thought of.",
-    name: "Michael Rodriguez",
-    role: "Senior Resident, Aspen",
-    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=400&auto=format&fit=crop",
-    rating: 5
+    quote: "We apply clinical rigor to residential settings. Every modification is calculated based on biomechanics, not just building codes. This is healthcare infrastructure disguised as luxury.",
+    title: "The Medical Standard",
+    subtitle: "Clinical Rigor",
+    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400&auto=format&fit=crop",
+    features: [
+        { label: "Standard", value: "ISO 9001" },
+        { label: "Input", value: "Clinical" },
+        { label: "Goal", value: "Prevention" }
+    ]
   },
   {
-    quote: "The lighting upgrades made a huge difference. I feel so much safer walking at night now, and the aesthetic is absolutely stunning.",
-    name: "Eleanor Vance",
-    role: "Resident, Lake Worth",
-    image: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?q=80&w=400&auto=format&fit=crop",
-    rating: 5
+    quote: "A home should adapt to its owner, not the other way around. Our 'Forever Promise' ensures that as your needs evolve, your environment evolves with you—seamlessly and rapidly.",
+    title: "The Service Promise",
+    subtitle: "Concierge Care",
+    image: "https://images.unsplash.com/photo-1581579438747-1dc8d17bbce4?q=80&w=400&auto=format&fit=crop",
+    features: [
+        { label: "Response", value: "24/7" },
+        { label: "Updates", value: "Annual" },
+        { label: "Scope", value: "Total" }
+    ]
   }
 ];
 
 export const AnimatedTestimonials = () => {
   const [active, setActive] = useState(0);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActive(prev => (prev + 1) % testimonials.length);
-    }, 6000);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
-    <div className="relative w-full max-w-6xl mx-auto px-6 py-12">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        {/* Image/Avatar Area */}
-        <div className="relative aspect-[3/4] md:aspect-square w-full rounded-sm overflow-hidden shadow-2xl group">
-             {/* Main Image */}
-             <div 
-               key={active}
-               className="absolute inset-0 bg-cover bg-center transition-all duration-700 ease-in-out scale-110 group-hover:scale-100"
-               style={{ backgroundImage: `url(${testimonials[active].image})` }}
-             >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-             </div>
-             
-             {/* Quote Icon Overlay */}
-             <div className="absolute top-8 left-8 text-8xl font-serif text-white/10 leading-none">
-                "
-             </div>
-             
-             {/* Info Overlay */}
-             <div className="absolute bottom-0 left-0 right-0 p-8 transform translate-y-0 transition-transform duration-500">
-                <div className="flex items-center gap-4">
-                    <div>
-                        <div className="text-2xl font-serif text-white italic">{testimonials[active].name}</div>
-                        <div className="text-sm text-gold uppercase tracking-widest mt-1">{testimonials[active].role}</div>
-                    </div>
+    <div className="max-w-7xl mx-auto px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            
+            {/* Image Side */}
+            <div className="relative aspect-square lg:aspect-[4/3] rounded-sm overflow-hidden shadow-2xl">
+                <AnimatePresence mode="wait">
+                    <motion.div 
+                        key={active}
+                        initial={{ opacity: 0, scale: 1.1 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.7 }}
+                        className="absolute inset-0 bg-cover bg-center"
+                        style={{ backgroundImage: `url(${pillars[active].image})` }}
+                    >
+                         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                    </motion.div>
+                </AnimatePresence>
+                
+                <div className="absolute bottom-8 left-8 right-8">
+                     <h3 className="text-3xl font-serif text-white italic mb-1">{pillars[active].title}</h3>
+                     <p className="text-gold text-sm uppercase tracking-widest font-bold">{pillars[active].subtitle}</p>
                 </div>
-             </div>
-        </div>
+            </div>
 
-        {/* Text Content */}
-        <div className="space-y-8 relative">
-             <div className="flex gap-1">
-                {[...Array(5)].map((_, i) => (
-                    <span key={i} className="text-gold text-xl">★</span>
-                ))}
-             </div>
-             
-             <div className="relative overflow-hidden min-h-[120px]">
-                <p key={active} className="text-2xl md:text-3xl font-light text-neutral-200 leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    "{testimonials[active].quote}"
-                </p>
-             </div>
+            {/* Content Side */}
+            <div className="space-y-8">
+                <IconQuote className="text-gold w-12 h-12 opacity-50" />
+                
+                <div className="h-[180px] overflow-hidden relative">
+                    <AnimatePresence mode="wait">
+                        <motion.p 
+                            key={active}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="text-2xl md:text-3xl font-light text-neutral-200 leading-relaxed"
+                        >
+                            "{pillars[active].quote}"
+                        </motion.p>
+                    </AnimatePresence>
+                </div>
 
-             <div className="flex gap-3 pt-4">
-                {testimonials.map((_, idx) => (
+                {/* Features Grid (Replaced specific stats with service attributes) */}
+                <div className="grid grid-cols-3 gap-4 border-t border-white/10 pt-8">
+                    {pillars[active].features.map((stat, i) => (
+                        <div key={i}>
+                            <p className="text-xl font-serif text-white">{stat.value}</p>
+                            <p className="text-neutral-500 text-xs uppercase tracking-widest">{stat.label}</p>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Controls */}
+                <div className="flex gap-4 pt-4">
                     <button 
-                        key={idx}
-                        onClick={() => setActive(idx)}
-                        className={`h-1 transition-all duration-500 rounded-full ${active === idx ? 'bg-gold w-12' : 'bg-white/20 w-4 hover:bg-white/40'}`}
-                        aria-label={`View testimonial ${idx + 1}`}
-                    />
-                ))}
-             </div>
+                        onClick={() => setActive((prev) => (prev - 1 + pillars.length) % pillars.length)}
+                        className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-gold hover:text-black hover:border-gold transition-all"
+                    >
+                        ←
+                    </button>
+                    <button 
+                        onClick={() => setActive((prev) => (prev + 1) % pillars.length)}
+                        className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-gold hover:text-black hover:border-gold transition-all"
+                    >
+                        →
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
   );
 };

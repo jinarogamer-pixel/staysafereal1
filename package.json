@@ -17,7 +17,8 @@
     "clsx": "2.1.1",
     "tailwind-merge": "2.3.0",
     "@tabler/icons-react": "3.2.0",
-    "@google/genai": "^1.38.0"
+    "@google/genai": "^1.38.0",
+    "firebase": "^12.8.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

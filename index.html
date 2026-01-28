@@ -23,33 +23,59 @@
       :root {
         --font-serif: 'Playfair Display', serif;
         --font-sans: 'Inter', sans-serif;
+        --text-primary: #ffffff;
+        --text-secondary: #d4d4d4;
+        --text-tertiary: #a3a3a3;
+      }
+      html {
+        font-size: 18px; /* Optimized for readability */
+        scroll-behavior: smooth;
       }
       body {
         margin: 0;
         font-family: var(--font-sans);
         background-color: #0a0a0a;
-        color: #F0F0F0;
+        color: var(--text-secondary);
         overflow-x: hidden;
-      }
-      html {
-        scroll-behavior: smooth;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        line-height: 1.7; /* Relaxed leading for better readability */
       }
       h1, h2, h3, h4, h5, h6 {
         font-family: var(--font-serif);
+        color: var(--text-primary);
+        line-height: 1.2;
+      }
+      p {
+        max-width: 65ch; /* Optimal line length for reading */
       }
       /* Custom Scrollbar */
       ::-webkit-scrollbar {
-        width: 8px;
+        width: 10px;
       }
       ::-webkit-scrollbar-track {
         background: #0a0a0a;
       }
       ::-webkit-scrollbar-thumb {
         background: #333;
-        border-radius: 4px;
+        border-radius: 5px;
+        border: 2px solid #0a0a0a;
       }
       ::-webkit-scrollbar-thumb:hover {
         background: #555;
+      }
+      
+      /* Accessibility Focus Styles */
+      *:focus-visible {
+        outline: 3px solid #D4AF37;
+        outline-offset: 4px;
+        border-radius: 2px;
+      }
+
+      /* Touch Targets */
+      button, a, input, select, textarea {
+        min-height: 48px; /* Increased touch target size */
+        min-width: 48px;
       }
     </style>
     <script>
@@ -64,10 +90,6 @@
                 light: '#E6B800',
                 dark: '#AA8C2C',
               },
-              teal: {
-                DEFAULT: '#00A896',
-                dim: 'rgba(0, 168, 150, 0.1)',
-              }
             },
             fontFamily: {
               serif: ['Playfair Display', 'serif'],
@@ -92,7 +114,11 @@
     "tailwind-merge": "https://esm.sh/tailwind-merge@2.3.0",
     "@tabler/icons-react": "https://esm.sh/@tabler/icons-react@3.2.0?external=react",
     "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.38.0"
+    "@google/genai": "https://esm.sh/@google/genai@^1.38.0",
+    "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+    "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js",
+    "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js",
+    "firebase/": "https://esm.sh/firebase@^12.8.0/"
   }
 }
 </script>

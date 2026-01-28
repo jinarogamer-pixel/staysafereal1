@@ -8,7 +8,7 @@ const articles = [
     category: "Financial Intelligence",
     title: "The Hidden ROI of Aging in Place vs. Assisted Living",
     excerpt: "A comprehensive financial analysis showing how preventative home architecture costs 70% less than luxury care facilities over a 5-year horizon.",
-    image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c",
+    image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800&auto=format&fit=crop",
     readTime: "5 min read",
     link: "#"
   },
@@ -16,7 +16,7 @@ const articles = [
     category: "Design Aesthetics",
     title: "Form Meets Function: The End of Institutional Hardware",
     excerpt: "We review the top European manufacturers reimagining grab bars as architectural jewelry—featuring polished brass, matte black, and knurled steel textures.",
-    image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c",
+    image: "https://images.unsplash.com/photo-1620626012053-1c1ad712952b?q=80&w=800&auto=format&fit=crop",
     readTime: "4 min read",
     link: "#"
   },
@@ -24,7 +24,7 @@ const articles = [
     category: "Expert Insights",
     title: "5 Invisible Hazards in the Modern Florida Home",
     excerpt: "Why open-plan layouts and terrazzo floors, while beautiful, present unique biomechanical challenges for seniors—and how to mitigate them subtly.",
-    image: "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea",
+    image: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=800&auto=format&fit=crop",
     readTime: "6 min read",
     link: "#"
   }
